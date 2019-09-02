@@ -19,10 +19,7 @@ class MyDataset(Dataset):
     def __init__(self):
         self.data = []
         path = '/home/lms/Documents/speech-music-classify-lms'
-        speech_wav_files = []
-        speech_wav_files_xinwen = glob.glob(os.path.join(path, 'speech', '*.wav'))
-        speech_wav_files.append(speech_wav_files_xinwen)
-        speech_wav_files_timit = 
+        speech_wav_files = glob.glob(os.path.join(path, 'speech', '*', '*.wav'))
         music_wav_files = glob.glob(os.path.join(path, 'music', '*.wav'))
    
         ##speech label: 0
@@ -31,14 +28,15 @@ class MyDataset(Dataset):
             if len(signal) < 180000:
             #     print(speech)
                 signal = padding(signal)
-            else:
-                signal = signal
-            n = int(len(signal)/180000)
-            #print(n)
-            for i in range(n):
-                signal_i = signal[i*180000:(i+1)*180000]
-                mfcc_features = compute_mfcc(signal_i, 16000)
+                mfcc_features = compute_mfcc(signal, 16000)
                 self.data.append((mfcc_features, 0))
+            else:
+                n = int(len(signal)/180000)
+            #print(n)
+                for i in range(n):
+                    signal_i = signal[i*180000:(i+1)*180000]
+                    mfcc_features = compute_mfcc(signal_i, 16000)
+                    self.data.append((mfcc_features, 0))
         print('the number of speech for training: {}'.format(len(self.data)))
         speech_data = len(self.data)
         
@@ -48,14 +46,15 @@ class MyDataset(Dataset):
             if len(signal) < 180000:
             #     print(speech)
                 signal = padding(signal)
-            else:
-                signal = signal
-            n = int(len(signal)/180000)
-            #print(n)
-            for i in range(n):
-                signal_i = signal[i*180000:(i+1)*180000]
-                mfcc_features = compute_mfcc(signal_i, 16000)
+                mfcc_features = compute_mfcc(signal, 16000)
                 self.data.append((mfcc_features, 1))
+            else:
+                n = int(len(signal)/180000)
+            #print(n)
+                for i in range(n):
+                    signal_i = signal[i*180000:(i+1)*180000]
+                    mfcc_features = compute_mfcc(signal_i, 16000)
+                    self.data.append((mfcc_features, 1))
         print('the number of music for training: {}'.format(len(self.data)-speech_data)) 
     
     def __getitem__(self, idx):
