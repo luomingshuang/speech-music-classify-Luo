@@ -87,7 +87,7 @@ class Speech_Music_Classify(nn.Module):
         x = x.transpose(2,1).contiguous()
         x = x.view(-1, x.size(1), x.size(2))
         #print(x.size())
-        for i in range(opt.batch_size):
+        for i in range(x.size(0)):
             #print(x[i].size())
             m[i] = self.fc(x[i])
             #print(x[i].size())

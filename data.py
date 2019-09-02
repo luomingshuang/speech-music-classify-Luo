@@ -15,7 +15,7 @@ def padding(array):
         array.append(np.zeros(size))
     return np.stack(array, axis=0)
 
-class MyDataset(Dataset):
+class MyDataset_train(Dataset):
     def __init__(self):
         self.data = []
         path = '/home/lms/Documents/speech-music-classify-lms'
@@ -65,3 +65,53 @@ class MyDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
+
+class MyDataset_test(Dataset):
+    def __init__(self):
+        self.data = []
+        path = '/home/lms/Documents/speech-music-classify-lms'
+        speech_wav_files = glob.glob(os.path.join(path, 'speech-test', '*', '*.wav'))
+        music_wav_files = glob.glob(os.path.join(path, 'music-test', '*.wav'))
+   
+        ##speech label: 0
+        for speech in speech_wav_files:
+            fs, signal = wav.read(speech)
+            if len(signal) < 180000:
+            #     print(speech)
+                signal = padding(signal)
+                mfcc_features = compute_mfcc(signal, 16000)
+                self.data.append((mfcc_features, 0))
+            else:
+                n = int(len(signal)/180000)
+            #print(n)
+                for i in range(n):
+                    signal_i = signal[i*180000:(i+1)*180000]
+                    mfcc_features = compute_mfcc(signal_i, 16000)
+                    self.data.append((mfcc_features, 0))
+        print('the number of speech for testing: {}'.format(len(self.data)))
+        speech_data = len(self.data)
+        
+        ##music label: 1
+        for music in music_wav_files:
+            fs, signal = wav.read(music)
+            if len(signal) < 180000:
+            #     print(speech)
+                signal = padding(signal)
+                mfcc_features = compute_mfcc(signal, 16000)
+                self.data.append((mfcc_features, 1))
+            else:
+                n = int(len(signal)/180000)
+            #print(n)
+                for i in range(n):
+                    signal_i = signal[i*180000:(i+1)*180000]
+                    mfcc_features = compute_mfcc(signal_i, 16000)
+                    self.data.append((mfcc_features, 1))
+        print('the number of music for testing: {}'.format(len(self.data)-speech_data)) 
+    
+    def __getitem__(self, idx):
+        (mfcc_features, label) = self.data[idx]
+        #print(mfcc_features.shape)
+        return {'inputs':torch.FloatTensor(mfcc_features), 'label':label}
+            
+    def __len__(self):
+        return len(self.data)
